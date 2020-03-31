@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import collections
 
 def flatten(d, parent_key='', sep='.'):
