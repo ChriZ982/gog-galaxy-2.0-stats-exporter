@@ -1,6 +1,9 @@
 # GOG Galaxy 2.0 Stats CSV Exporter
 
 ## Usage
+
+You will most likely find the GOG Galaxy 2.0 Database under `C:\ProgramData\GOG.com\Galaxy\storage\galaxy-2.0.db`.
+
 ```
 usage: gog-stats-exporter.py [-h] [-d DATABASE] [-o OUTPUT]
                              [-l {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}]
