@@ -2,6 +2,8 @@
 
 Feel free to look at the `gog-stats-analysis.ipynb` Jupyter Notebook!
 
+In case GitHub doesn't show it correctly use [this link](https://nbviewer.jupyter.org/github/ChriZ982/GOG-Galaxy-2.0-Stats-Exporter/blob/develop/gog-stats-analysis.ipynb).
+
 ## Planned Features
 * Add original price info of games
 * Include Metacritic ratings
