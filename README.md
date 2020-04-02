@@ -1,5 +1,15 @@
 # GOG Galaxy 2.0 Stats Exporter
 
+Feel free to look at the `gog-stats-analysis.ipynb` Jupyter Notebook!
+
+## Planned Features
+* Add original price info of games
+* Include Metacritic ratings
+* Add calculations for "Price per minute"
+* Add comparison with friends
+* Maybe add comparison to HowLongToBeat data
+* Add possibility to provide manual overrides
+
 ## Usage
 
 You will most likely find the GOG Galaxy 2.0 Database under `C:\ProgramData\GOG.com\Galaxy\storage\galaxy-2.0.db`.
