@@ -8,9 +8,9 @@
             "name": "GOG Stats Exporter Debug",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "src/gog_stats_exporter.py",
             "console": "integratedTerminal",
-            "args": ["-d", "data/galaxy-2.0.db", "-o", "data/output.csv", "-l", "DEBUG"]
+            "args": ["-d", "data/galaxy-2.0.db", "-o", "data/output.csv", "-l", "DEBUG", "-p"]
         }
     ]
 }
