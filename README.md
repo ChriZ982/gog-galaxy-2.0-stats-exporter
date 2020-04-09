@@ -2,7 +2,7 @@
 
 Feel free to look at the `gog-stats-analysis.ipynb` Jupyter Notebook!
 
-In case GitHub doesn't show it correctly use [this link](https://nbviewer.jupyter.org/github/ChriZ982/GOG-Galaxy-2.0-Stats-Exporter/blob/master/gog_stats_analysis.ipynb).
+In case GitHub doesn't show it correctly use [this link](https://nbviewer.jupyter.org/github/ChriZ982/GOG-Galaxy-2.0-Stats-Exporter/blob/develop/gog_stats_analysis.ipynb).
 
 ## Planned Features
 * [x] Add original price info of games
