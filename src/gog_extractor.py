@@ -6,6 +6,7 @@ import logging
 import sqlite3
 import json
 
+logger = logging.getLogger('gog')
 GAME_STMT = '''SELECT OwnedGames.releaseKey, GamePieceTypes.type, GamePieces.userId, GamePieces.value FROM OwnedGames
                LEFT JOIN GamePieces ON GamePieces.releaseKey = OwnedGames.releaseKey
                LEFT JOIN GamePieceTypes ON GamePieces.gamePieceTypeId = GamePieceTypes.id'''
@@ -15,7 +16,7 @@ TIME_STMT = 'SELECT releaseKey, minutesInGame, lastSessionEnd FROM GameTimes'
 JOIN_KEYS = ['meta.developers', 'meta.genres', 'meta.publishers', 'meta.themes', 'myTags.tags', 'originalMeta.developers', 'originalMeta.genres', 'originalMeta.publishers', 'originalMeta.themes']
 
 def extract(args):
-    logging.info('Extracting game list from GOG Galaxy 2.0...')
+    logger.info('Extracting game list from GOG Galaxy 2.0...')
     if not os.path.isfile(args.database):
         raise Exception('Database does not exist: ' + args.database)
 

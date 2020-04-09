@@ -15,22 +15,24 @@ if __name__ == '__main__':
     parser.add_argument('-l', '--logging', help='defines log level', default='INFO', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'])
 
     args = parser.parse_args()
-    logging.basicConfig(level=args.logging)
-    logging.debug('Provided command line args: %s', args)
+    logging.basicConfig(level=args.logging,
+                        format='%(asctime)s %(levelname)-8s [%(name)s] %(message)s')
+    logger = logging.getLogger('main')
+    logger.debug('Provided command line args: %s', args)
 
     start = time.time()
 
     games = gog.extract(args)
 
     done = time.time()
-    print('GOG elapsed time:', done - start)
+    logger.debug('GOG elapsed time: %f', done - start)
     start = time.time()
 
     steamprices = SteampricesExtractor(args, games)
     games = steamprices.extract()
 
     done = time.time()
-    print('Prices elapsed time:', done - start)
+    logger.debug('Prices elapsed time: %f', done - start)
 
     headers = set()
     for value in games.values():

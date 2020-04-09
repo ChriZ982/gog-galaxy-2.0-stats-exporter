@@ -2,10 +2,12 @@
 import requests
 import logging
 import time
+import multiprocessing
 from bs4 import BeautifulSoup
 
+logger = logging.getLogger('steamprices')
 PROXY_LIST_URL = 'https://free-proxy-list.net/'
-BASE_URL = 'https://www.steamprices.com/eu/app/'
+BASE_URL = 'https://www.steamprices.com/eu/'
 
 class SteampricesExtractor:
     def __init__(self, args, games):
@@ -19,53 +21,85 @@ class SteampricesExtractor:
         table = soup.find('table', {'class': 'table'})
         return list(map(lambda row: row.contents[0].text + ':' + row.contents[1].text, list(table.findAll('tr'))[1:-1]))
 
-    def do_request(self, steamId):
-        result = ""
-        if self.args.proxied:
-            if len(self.proxies) == 0:
-                logging.error('No proxies left. Starting over...')
-                self.proxies = self.get_proxies()
-            old_proxies = self.proxies.copy()
-            for proxy in old_proxies:
-                try:
-                    logging.debug('Using proxy %s', proxy)
-                    result = requests.get(BASE_URL + steamId, allow_redirects=False, proxies={"http": proxy, "https": proxy}, timeout=(1.5, 10))
-                    if result.status_code in [200, 404]:
-                        break
+    def process_task(self, proxy, queue, games):
+        logger = logging.getLogger('proxy-' + proxy)
+        try:
+            google = requests.get("https://www.google.com", allow_redirects=False, proxies={"http": proxy, "https": proxy}, timeout=(5,15))
+            if google.status_code != 200:
+                raise Exception
+        except:
+            logger.debug('Dead proxy')
+            return
+
+        logger.debug('Using proxy')
+        while not queue.empty():
+            key = queue.get()
+            try:
+                result = requests.get(BASE_URL + 'app/' + games[key]['steamId'], allow_redirects=False, proxies={"http": proxy, "https": proxy}, timeout=(5, 30))
+                if result.status_code not in [200, 404]:
+                    raise requests.exceptions.ProxyError
+                if result.status_code == 404:
+                    result = requests.get(BASE_URL + 'dlc/' + games[key]['steamId'], allow_redirects=False, proxies={"http": proxy, "https": proxy}, timeout=(5, 30))
+                    if result.status_code not in [200, 404]:
+                        raise requests.exceptions.ProxyError
+                    if result.status_code == 404:
+                        raise AttributeError
+                soup = BeautifulSoup(result.text, 'html.parser')
+                text = soup.find('td', {'class': 'price_curent'}).span.text
+                if text == 'Free':
+                    games[key]['price.current'] = 0.0
+                else:
+                    games[key]['price.current'] = float(text.split(' ')[1])
+                high = soup.find(text='Highest regular price:')
+                if high == None:
+                    games[key]['price.high'] = games[key]['price.current']
+                else:
+                    text = high.parent.parent.find('span', {'class': 'price'}).text
+                    if text == 'Free':
+                        games[key]['price.high'] = 0.0
                     else:
-                        self.proxies.remove(proxy)
-                except Exception as ex:
-                    self.proxies.remove(proxy)
-                    logging.debug('Proxy %s not reachable: %s', proxy, ex)
-        else:
-            result = requests.get(BASE_URL + steamId, allow_redirects=False)
-        return result
+                        games[key]['price.high'] = float(text.split(' ')[1])
+            except (requests.exceptions.ConnectTimeout, requests.exceptions.ProxyError):
+                logger.debug('Proxy failed (timeout)')
+                queue.put(key)
+                return
+            except (IndexError, AttributeError):
+                logger.warning('Could not get price info of game "%s", Steam ID %s', games[key]['title.title'], games[key]['steamId'])
+            except Exception as ex:
+                logger.error('Unexpected exception: %s', ex)
+                queue.put(key)
+                return
 
     def extract(self):
-        logging.info('Extracting prices from steamprices.com. This could take a while...')
+        logger.info('Extracting prices from steamprices.com. This could take a while...')
+        if not self.args.proxied:
+            logger.critical('Non proxy mode not supported right now!')
+            return self.games
 
-        if self.args.proxied:
-            self.proxies = self.get_proxies()
-        
-        request_count = 0
+        manager = multiprocessing.Manager()
+        games = manager.dict()
+        tasks = multiprocessing.Queue()
         for key in self.games.keys():
-            if 'steamId' not in self.games[key]:
-                logging.info('Game "%s" has no Steam ID', self.games[key]['title.title'])
-                continue
-            try:
-                result = self.do_request(self.games[key]['steamId'])
-                if result.status_code == 302:
-                    logging.error('Too many requests after %s were successful', request_count)
-                    break
-                if result.status_code != 200:
-                    logging.warning('Could not get price info of game "%s", Steam ID %s', self.games[key]['title.title'], self.games[key]['steamId'])
-                    continue
-                request_count += 1
-                soup = BeautifulSoup(result.text, 'html.parser')
-                self.games[key]['price.current'] = float(soup.find('td', {'class': 'price_curent'}).span.text.split(' ')[1])
-                self.games[key]['price.high'] = float(soup.find(text='Highest regular price:').parent.parent.find('span', {'class': 'price'}).text.split(' ')[1])
-            except Exception as ex:
-                logging.warning('Could not get price info of game "%s", Steam ID %s: %s', self.games[key]['title.title'], self.games[key]['steamId'], ex)
-            if not self.args.proxied:
-                time.sleep(5)
-        return self.games
+            games[key] = manager.dict()
+            for k2 in self.games[key].keys():
+                games[key][k2] = self.games[key][k2]
+            if 'steamId' in self.games[key]:
+                tasks.put(key)
+
+        workers = []
+        for proxy in self.get_proxies():
+            worker = multiprocessing.Process(target=self.process_task, args=(proxy, tasks, games))
+            workers.append(worker)
+            worker.start()
+        for worker in workers:
+            worker.join()
+
+        if not tasks.empty():
+            logger.critical('Not all games annotated with price data. %d left. Probably ran out of proxies', tasks.qsize())
+
+        result = dict()
+        for key in games.keys():
+            result[key] = dict()
+            for k2 in games[key].keys():
+                result[key][k2] = games[key][k2]
+        return result
