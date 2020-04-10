@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import gog_extractor as gog
-from steamprices_extractor import SteampricesExtractor
+import steamprices_extractor as prices
 
 import csv
 import logging
@@ -21,18 +21,14 @@ if __name__ == '__main__':
     logger.debug('Provided command line args: %s', args)
 
     start = time.time()
-
     games = gog.extract(args)
-
     done = time.time()
-    logger.debug('GOG elapsed time: %f', done - start)
+    logger.debug('Elapsed time: %f', done - start)
+
     start = time.time()
-
-    steamprices = SteampricesExtractor(args, games)
-    games = steamprices.extract()
-
+    games = prices.extract(args, games)
     done = time.time()
-    logger.debug('Prices elapsed time: %f', done - start)
+    logger.debug('Elapsed time: %f', done - start)
 
     headers = set()
     for value in games.values():

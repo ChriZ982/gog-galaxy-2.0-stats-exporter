@@ -17,7 +17,7 @@ In case GitHub doesn't show it correctly use [this link](https://nbviewer.jupyte
 You will most likely find the GOG Galaxy 2.0 Database under `C:\ProgramData\GOG.com\Galaxy\storage\galaxy-2.0.db`.
 
 ```
-usage: gog-stats-exporter.py [-h] [-d DATABASE] [-o OUTPUT]
+usage: gog_stats_exporter.py [-h] [-d DATABASE] [-o OUTPUT] [-p [PROXIED]]
                              [-l {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}]
 
 Export stats from GOG Galaxy 2.0 to csv file.
@@ -28,6 +28,8 @@ optional arguments:
                         path to GOG Galaxy 2.0 database
   -o OUTPUT, --output OUTPUT
                         path to output csv file
+  -p [PROXIED], --proxied [PROXIED]
+                        using proxies to scrape websites faster
   -l {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}, --logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}
                         defines log level
 ```
