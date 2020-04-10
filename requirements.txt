@@ -1,7 +1,6 @@
 bs4==0.0.1
 chart-studio==1.1.0
 dash==1.10.0
-notebook==6.0.3
 pandas==1.0.3
 pandasql==0.7.3
 plotly==4.6.0

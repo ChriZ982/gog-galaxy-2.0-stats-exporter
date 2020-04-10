@@ -1,8 +1,8 @@
 # GOG Galaxy 2.0 Stats Exporter
 
-Feel free to look at the `gog-stats-analysis.ipynb` Jupyter Notebook!
+You can import your local GOG Galaxy 2.0 database and the exporter will create a .csv file that contains raw data about all of your games. You can then run the `gog_stats_analysis.py` to launch a Plotly Dash server with many nice statistics.
 
-In case GitHub doesn't show it correctly use [this link](https://nbviewer.jupyter.org/github/ChriZ982/GOG-Galaxy-2.0-Stats-Exporter/blob/develop/gog_stats_analysis.ipynb).
+Feel free to look at the [example preview](example/preview.png)!
 
 ## Planned Features
 * [x] Add original price info of games
@@ -17,6 +17,7 @@ In case GitHub doesn't show it correctly use [this link](https://nbviewer.jupyte
 Run `pip3 install -r requirements.txt` to install the following dependencies:
 * bs4
 * chart-studio
+* dash
 * pandas
 * pandasql
 * plotly
