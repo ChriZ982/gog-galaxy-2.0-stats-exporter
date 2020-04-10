@@ -12,7 +12,11 @@ GAME_STMT = '''SELECT OwnedGames.releaseKey, GamePieceTypes.type, GamePieces.use
 ADDED_STMT = 'SELECT gameReleaseKey, userId, addedDate FROM ProductPurchaseDates WHERE userId <> 0'
 TIME_STMT = 'SELECT releaseKey, minutesInGame, lastSessionEnd FROM GameTimes'
 
-JOIN_KEYS = ['meta.developers', 'meta.genres', 'meta.publishers', 'meta.themes', 'myTags.tags', 'originalMeta.developers', 'originalMeta.genres', 'originalMeta.publishers', 'originalMeta.themes']
+JOIN_KEYS = [
+    'meta.developers', 'meta.genres', 'meta.publishers', 'meta.themes', 'myTags.tags',
+    'originalMeta.developers', 'originalMeta.genres', 'originalMeta.publishers', 'originalMeta.themes'
+]
+
 
 def flatten(d, parent_key='', sep='.'):
     items = []
@@ -24,6 +28,7 @@ def flatten(d, parent_key='', sep='.'):
             items.append((new_key, v))
     return dict(items)
 
+
 def parseGames(results):
     games = dict()
     for id, type, userId, value in results:
@@ -33,10 +38,12 @@ def parseGames(results):
             games[id][type] = json.loads(value)
     return games
 
+
 def annotateInfo(games, key, col, results):
     for row in results:
         if row[0] in games:
             games[row[0]][key] = row[col]
+
 
 def extract(args):
     logger.info('Extracting game list from GOG Galaxy 2.0...')

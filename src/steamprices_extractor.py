@@ -9,16 +9,26 @@ logger = logging.getLogger('steamprices')
 PROXY_LIST_URL = 'https://free-proxy-list.net/'
 BASE_URL = 'https://www.steamprices.com/eu/'
 
+
 def get_proxies():
     result = requests.get(PROXY_LIST_URL)
     soup = BeautifulSoup(result.text, 'html.parser')
     table = soup.find('table', {'class': 'table'})
-    return list(map(lambda row: row.contents[0].text + ':' + row.contents[1].text, list(table.findAll('tr'))[1:-1]))
+    return list(
+        map(lambda row: row.contents[0].text + ':' + row.contents[1].text,
+            list(table.findAll('tr'))[1:-1]))
+
 
 def process_task(proxy, queue, games):
     logger = logging.getLogger('proxy-' + proxy)
     try:
-        google = requests.get("https://www.google.com", allow_redirects=False, proxies={"http": proxy, "https": proxy}, timeout=(5,15))
+        google = requests.get("https://www.google.com",
+                              allow_redirects=False,
+                              proxies={
+                                  "http": proxy,
+                                  "https": proxy
+                              },
+                              timeout=(5, 15))
         if google.status_code != 200:
             raise Exception
     except:
@@ -29,11 +39,23 @@ def process_task(proxy, queue, games):
     while not queue.empty():
         key = queue.get()
         try:
-            result = requests.get(BASE_URL + 'app/' + games[key]['steamId'], allow_redirects=False, proxies={"http": proxy, "https": proxy}, timeout=(5, 30))
+            result = requests.get(BASE_URL + 'app/' + games[key]['steamId'],
+                                  allow_redirects=False,
+                                  proxies={
+                                      "http": proxy,
+                                      "https": proxy
+                                  },
+                                  timeout=(5, 30))
             if result.status_code not in [200, 404]:
                 raise requests.exceptions.ProxyError
             if result.status_code == 404:
-                result = requests.get(BASE_URL + 'dlc/' + games[key]['steamId'], allow_redirects=False, proxies={"http": proxy, "https": proxy}, timeout=(5, 30))
+                result = requests.get(BASE_URL + 'dlc/' + games[key]['steamId'],
+                                      allow_redirects=False,
+                                      proxies={
+                                          "http": proxy,
+                                          "https": proxy
+                                      },
+                                      timeout=(5, 30))
                 if result.status_code not in [200, 404]:
                     raise requests.exceptions.ProxyError
                 if result.status_code == 404:
@@ -58,11 +80,13 @@ def process_task(proxy, queue, games):
             queue.put(key)
             return
         except (IndexError, AttributeError):
-            logger.warning('Could not get price info of game "%s", Steam ID %s', games[key]['title.title'], games[key]['steamId'])
+            logger.warning('Could not get price info of game "%s", Steam ID %s', games[key]['title.title'],
+                           games[key]['steamId'])
         except Exception as ex:
             logger.error('Unexpected exception: %s', ex)
             queue.put(key)
             return
+
 
 def extract(args, games):
     logger.info('Extracting prices from steamprices.com. This could take a while...')
@@ -96,7 +120,8 @@ def extract(args, games):
             worker.join()
 
     if not tasks.empty():
-        logger.critical('Not all games annotated with price data. %d left. Probably ran out of proxies', tasks.qsize())
+        logger.critical('Not all games annotated with price data. %d left. Probably ran out of proxies',
+                        tasks.qsize())
 
     result = dict()
     for key in shared_games.keys():
