@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Running yapf formatter..."
+yapf --style {COLUMN_LIMIT=110} -ir src/
+yapf --style {COLUMN_LIMIT=110} -i gog_stats_analysis.py
+git add src/ gog_stats_analysis.py

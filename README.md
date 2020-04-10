@@ -1,8 +1,8 @@
 # GOG Galaxy 2.0 Stats Exporter
 
-Feel free to look at the `gog-stats-analysis.ipynb` Jupyter Notebook!
+You can import your local GOG Galaxy 2.0 database and the exporter will create a .csv file that contains raw data about all of your games. You can then run the `gog_stats_analysis.py` to launch a Plotly Dash server with many nice statistics.
 
-In case GitHub doesn't show it correctly use [this link](https://nbviewer.jupyter.org/github/ChriZ982/GOG-Galaxy-2.0-Stats-Exporter/blob/develop/gog_stats_analysis.ipynb).
+Feel free to look at the [example preview](example/preview.png)!
 
 ## Planned Features
 * [x] Add original price info of games
@@ -12,12 +12,23 @@ In case GitHub doesn't show it correctly use [this link](https://nbviewer.jupyte
 * [ ] Maybe add comparison to HowLongToBeat data
 * [ ] Add possibility to provide manual overrides
 
+## Prerequisites
+
+Run `pip3 install -r requirements.txt` to install the following dependencies:
+* bs4
+* chart-studio
+* dash
+* pandas
+* pandasql
+* plotly
+* yapf
+
 ## Usage
 
 You will most likely find the GOG Galaxy 2.0 Database under `C:\ProgramData\GOG.com\Galaxy\storage\galaxy-2.0.db`.
 
 ```
-usage: gog-stats-exporter.py [-h] [-d DATABASE] [-o OUTPUT]
+usage: gog_stats_exporter.py [-h] [-d DATABASE] [-o OUTPUT] [-p [PROXIED]]
                              [-l {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}]
 
 Export stats from GOG Galaxy 2.0 to csv file.
@@ -28,6 +39,8 @@ optional arguments:
                         path to GOG Galaxy 2.0 database
   -o OUTPUT, --output OUTPUT
                         path to output csv file
+  -p [PROXIED], --proxied [PROXIED]
+                        using proxies to scrape websites faster
   -l {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}, --logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}
                         defines log level
 ```

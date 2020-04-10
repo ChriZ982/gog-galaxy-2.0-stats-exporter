@@ -5,12 +5,28 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "GOG Stats Analysis",
+            "type": "python",
+            "request": "launch",
+            "program": "gog_stats_analysis.py",
+            "console": "integratedTerminal",
+            "args": ["-d"]
+        },
+        {
             "name": "GOG Stats Exporter Debug",
             "type": "python",
             "request": "launch",
             "program": "src/gog_stats_exporter.py",
             "console": "integratedTerminal",
-            "args": ["-d", "data/galaxy-2.0.db", "-o", "data/output.csv", "-l", "DEBUG", "-p"]
+            "args": [
+                "-d",
+                "data/galaxy-2.0.db",
+                "-o",
+                "data/output.csv",
+                "-l",
+                "DEBUG",
+                "-p"
+            ]
         }
     ]
 }
