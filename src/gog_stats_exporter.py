@@ -43,7 +43,7 @@ if __name__ == '__main__':
         headers.update(value.keys())
     headers = sorted(headers)
 
-    with open(args.output, 'w') as f:
+    with open(args.output, 'w', encoding='utf8') as f:
         writer = csv.DictWriter(f, fieldnames=headers)
         writer.writeheader()
         for game in games.values():
