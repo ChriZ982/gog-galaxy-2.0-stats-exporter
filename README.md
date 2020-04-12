@@ -1,19 +1,21 @@
 # GOG Galaxy 2.0 Stats Exporter
+Run `src\gog_stats_exporter.py` to create a csv file containing data of all your owned games. The data is also annotated with price data from steamprices.com. You can provide the local GOG Galaxy 2.0 database and the exporter will automatically scan all your owned games. You will most likely find the GOG Galaxy 2.0 database at `C:\ProgramData\GOG.com\Galaxy\storage\galaxy-2.0.db`.
 
-You can import your local GOG Galaxy 2.0 database and the exporter will create a .csv file that contains raw data about all of your games. You can then run the `gog_stats_analysis.py` to launch a Plotly Dash server with many nice statistics.
+You can then run `gog_stats_analysis.py` to launch a Plotly Dash server with many nice statistics to further analyse your gaming library.
 
 Feel free to look at the [example preview](example/preview.png)!
 
 ## Planned Features
+* [ ] Implement the exporter using golang instead of python
 * [x] Add original price info of games
-* [ ] Include Metacritic ratings
+* [ ] Include Metacritic user ratings
 * [x] Add calculations for "Price per minute"
 * [ ] Add comparison with friends
 * [ ] Maybe add comparison to HowLongToBeat data
 * [ ] Add possibility to provide manual overrides
+* [ ] Add cache for price data so it does not have to be pulled every time
 
 ## Prerequisites
-
 Run `pip3 install -r requirements.txt` to install the following dependencies:
 * bs4
 * chart-studio
@@ -24,11 +26,9 @@ Run `pip3 install -r requirements.txt` to install the following dependencies:
 * yapf
 
 ## Usage
-
-You will most likely find the GOG Galaxy 2.0 Database under `C:\ProgramData\GOG.com\Galaxy\storage\galaxy-2.0.db`.
-
 ```
 usage: gog_stats_exporter.py [-h] [-d DATABASE] [-o OUTPUT] [-p [PROXIED]]
+                             [--skip-prices [SKIP_PRICES]]
                              [-l {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}]
 
 Export stats from GOG Galaxy 2.0 to csv file.
@@ -36,13 +36,19 @@ Export stats from GOG Galaxy 2.0 to csv file.
 optional arguments:
   -h, --help            show this help message and exit
   -d DATABASE, --database DATABASE
-                        path to GOG Galaxy 2.0 database
+                        Path to GOG Galaxy 2.0 database.
   -o OUTPUT, --output OUTPUT
-                        path to output csv file
+                        Path to output csv file.
   -p [PROXIED], --proxied [PROXIED]
-                        using proxies to scrape websites faster
+                        Using proxies to scrape websites faster. Use at your
+                        own risk! Without this setting the robots.txt is used
+                        to configure the delay between requests.
+  --skip-prices [SKIP_PRICES]
+                        Skips the annotations of price data from
+                        steamprices.com. Keep in mind that further analysis
+                        might not work because of the missing fields.
   -l {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}, --logging {CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET}
-                        defines log level
+                        Defines log level.
 ```
 
 ## License

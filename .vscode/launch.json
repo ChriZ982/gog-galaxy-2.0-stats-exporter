@@ -24,8 +24,7 @@
                 "-o",
                 "data/output.csv",
                 "-l",
-                "DEBUG",
-                "-p"
+                "DEBUG"
             ]
         }
     ]
