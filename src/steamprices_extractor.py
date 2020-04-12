@@ -8,10 +8,11 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger('steamprices')
 PROXY_LIST_URL = 'https://free-proxy-list.net/'
 BASE_URL = 'https://www.steamprices.com/eu/'
+LOCAL = 'LOCAL'
 
 
 def get_proxies():
-    result = requests.get(PROXY_LIST_URL)
+    result = do_request(PROXY_LIST_URL, LOCAL)
     soup = BeautifulSoup(result.text, 'html.parser')
     table = soup.find('table', {'class': 'table'})
     return list(
@@ -19,43 +20,42 @@ def get_proxies():
             list(table.findAll('tr'))[1:-1]))
 
 
+def do_request(url, proxy):
+    headers = {
+        'User-Agent':
+        'gog-galaxy-2.0-stats-exporter/0.2.1 https://github.com/ChriZ982/gog-galaxy-2.0-stats-exporter'
+    }
+    if proxy == LOCAL:
+        return requests.get(url, allow_redirects=False, headers=headers)
+    else:
+        return requests.get(url,
+                            allow_redirects=False,
+                            proxies={
+                                "http": proxy,
+                                "https": proxy
+                            },
+                            headers=headers)
+
+
 def process_task(proxy, queue, games):
-    logger = logging.getLogger('proxy-' + proxy)
+    logger = logging.getLogger('worker-' + proxy)
     try:
-        google = requests.get("https://www.google.com",
-                              allow_redirects=False,
-                              proxies={
-                                  "http": proxy,
-                                  "https": proxy
-                              },
-                              timeout=(5, 15))
+        google = do_request("https://www.google.com", proxy)
         if google.status_code != 200:
             raise Exception
     except:
-        logger.debug('Dead proxy')
+        logger.debug('Dead worker')
         return
 
-    logger.debug('Using proxy')
-    while not queue.empty():
-        key = queue.get()
+    logger.debug('Started worker')
+    while queue.qsize() > 0:
         try:
-            result = requests.get(BASE_URL + 'app/' + games[key]['steamId'],
-                                  allow_redirects=False,
-                                  proxies={
-                                      "http": proxy,
-                                      "https": proxy
-                                  },
-                                  timeout=(5, 30))
+            key = queue.get_nowait()
+            result = do_request(BASE_URL + 'app/' + games[key]['steamId'], proxy)
             if result.status_code not in [200, 404]:
                 raise requests.exceptions.ProxyError
             if result.status_code == 404:
-                result = requests.get(BASE_URL + 'dlc/' + games[key]['steamId'],
-                                      allow_redirects=False,
-                                      proxies={
-                                          "http": proxy,
-                                          "https": proxy
-                                      },
-                                      timeout=(5, 30))
+                result = do_request(BASE_URL + 'dlc/' + games[key]['steamId'], proxy)
                 if result.status_code not in [200, 404]:
                     raise requests.exceptions.ProxyError
                 if result.status_code == 404:
@@ -75,24 +75,27 @@ def process_task(proxy, queue, games):
                     games[key]['price.high'] = 0.0
                 else:
                     games[key]['price.high'] = float(text.split(' ')[1])
-        except (requests.exceptions.ConnectTimeout, requests.exceptions.ProxyError):
-            logger.debug('Proxy failed (timeout)')
+            time.sleep(5)
+        except (requests.exceptions.ConnectTimeout, requests.exceptions.ProxyError,
+                requests.exceptions.SSLError):
+            logger.debug('Worker failed and was stopped')
             queue.put(key)
             return
         except (IndexError, AttributeError):
             logger.warning('Could not get price info of game "%s", Steam ID %s', games[key]['title.title'],
                            games[key]['steamId'])
         except Exception as ex:
-            logger.error('Unexpected exception: %s', ex)
+            logger.error('Worker failed and was stopped. Unexpected cause: %s', ex)
             queue.put(key)
             return
 
 
 def extract(args, games):
-    logger.info('Extracting prices from steamprices.com. This could take a while...')
+    logger.info('Extracting prices from steamprices.com.')
     if not args.proxied:
-        logger.critical('Non proxy mode not supported right now!')
-        return games
+        logger.warning(
+            "This will take 5 seconds per game (extimated duration for your game library: %ds). You can use --proxied argument at your own risk to speed it up or disable price data annotation by using --skip-prices.",
+            5 * len(games.keys()))
 
     manager = multiprocessing.Manager()
     shared_games = manager.dict()
@@ -102,13 +105,16 @@ def extract(args, games):
         for k2 in games[key].keys():
             shared_games[key][k2] = games[key][k2]
         if 'steamId' in games[key]:
-            tasks.put(key)
+            tasks.put_nowait(key)
     size = tasks.qsize()
     previous = 0
 
-    while not tasks.empty():
+    while tasks.qsize() > 0:
         workers = []
-        for proxy in get_proxies():
+        proxies = [LOCAL]
+        if args.proxied:
+            proxies.extend(get_proxies())
+        for proxy in proxies:
             worker = multiprocessing.Process(target=process_task, args=(proxy, tasks, shared_games))
             workers.append(worker)
             worker.start()
@@ -119,9 +125,8 @@ def extract(args, games):
                 previous = progress
             worker.join()
 
-    if not tasks.empty():
-        logger.critical('Not all games annotated with price data. %d left. Probably ran out of proxies',
-                        tasks.qsize())
+    if tasks.qsize() > 0:
+        logger.critical('Not all games annotated with price data. %d games left.', tasks.qsize())
 
     result = dict()
     for key in shared_games.keys():
