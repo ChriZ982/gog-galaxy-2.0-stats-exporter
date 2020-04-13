@@ -6,7 +6,7 @@ Run `src\gog_stats_exporter.py` to create a csv file containing data of all your
 
 You can then run `gog_stats_analysis.py` to launch a Plotly Dash server with many nice statistics to further analyse your gaming library. :bar_chart:
 
-:rocket: Feel free to look at the [example preview](example/preview.png)!
+Feel free to look at the [example preview](example/preview.png)! :rocket:
 
 ## :sparkles: Planned Features
 * [ ] Implement the exporter using golang instead of python
@@ -61,7 +61,7 @@ If your feature is a good addition to the project, it will be merged!
 ##  :sparkling_heart: Support my projects
 If you like the project and you want to support me - please consider to gift using the button below.
 
-[![PayPal.Me ChriZ98](https://img.shields.io/badge/PayPal.Me-ChriZ98-00457C?logo=paypal&style=for-the-badge)](https://www.paypal.me/ChriZ98)
+[![PayPal.Me ChriZ98](https://img.shields.io/badge/PayPal.Me-ChriZ98-00457C?logo=paypal)](https://www.paypal.me/ChriZ98)
 
 Thanks! :heart:
 
