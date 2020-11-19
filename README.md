@@ -1,5 +1,7 @@
-
 # <img height="25" src="https://simpleicons.org/icons/gog-dot-com.svg"/> GOG Galaxy 2.0 Stats Exporter
+
+Main repository at: https://gitlab.com/ChriZ98/gog-galaxy-2-0-stats-exporter
+
 [![GOG Galaxy 2.0](https://img.shields.io/badge/GOG-Galaxy%202.0-86328A?logo=data:https://simpleicons.org/icons/gog-dot-com.svg)](https://www.gogalaxy.com/en/) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/ChriZ982/gog-galaxy-2.0-stats-exporter) ![GitHub stars](https://img.shields.io/github/stars/ChriZ982/gog-galaxy-2.0-stats-exporter) ![GitHub top language](https://img.shields.io/github/languages/top/ChriZ982/gog-galaxy-2.0-stats-exporter) [![PayPal.Me ChriZ98](https://img.shields.io/badge/PayPal.Me-ChriZ98-00457C?logo=paypal)](https://www.paypal.me/ChriZ98)
 
 Run `src\gog_stats_exporter.py` to create a csv file containing data of all your owned games. :video_game: The data is also annotated with price data from steamprices.com. You can provide the local GOG Galaxy 2.0 database and the exporter will automatically scan all your owned games. You will most likely find the GOG Galaxy 2.0 database at `C:\ProgramData\GOG.com\Galaxy\storage\galaxy-2.0.db`.
